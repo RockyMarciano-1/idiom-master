@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<!-- saved from url=(0051)file:///C:/Users/ohyg/Downloads/idiom-master_3.html -->
+<html lang="ko"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a1a2e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="숙어장">
+<title>Idiom Master · 영어 숙어장</title>
+
+<!-- PWA Manifest (inline via JS blob) -->
+<script>
+(function(){
+  const manifest = {
+    name: "Idiom Master 영어 숙어장",
+    short_name: "숙어장",
+    description: "영어 숙어 검색·암기·퀴즈 앱",
+    start_url: ".",
+    display: "standalone",
+    background_color: "#1a1a2e",
+    theme_color: "#1a1a2e",
+    orientation: "portrait",
+    icons: [
+      { src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='80' fill='%231a1a2e'/><text x='256' y='340' font-size='280' text-anchor='middle'>📖</text></svg>", sizes: "512x512", type: "image/svg+xml", purpose: "any maskable" }
+    ]
+  };
+  const blob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('link');
+  link.rel = 'manifest'; link.href = url;
+  document.head.appendChild(link);
+})();
+</script><link rel="manifest" href="blob:null/64ca7054-d7c1-4db0-b793-27992249e892">
+
+<!-- Apple Touch Icon (SVG data URI) -->
+<link rel="apple-touch-icon" href="data:image/svg+xml,&lt;svg xmlns=&#39;http://www.w3.org/2000/svg&#39; viewBox=&#39;0 0 180 180&#39;&gt;&lt;rect width=&#39;180&#39; height=&#39;180&#39; rx=&#39;40&#39; fill=&#39;%231a1a2e&#39;/&gt;&lt;text x=&#39;90&#39; y=&#39;130&#39; font-size=&#39;110&#39; text-anchor=&#39;middle&#39;&gt;%F0%9F%93%96&lt;/text&gt;&lt;/svg&gt;">
+
+<link rel="preconnect" href="https://fonts.googleapis.com/">
+<link href="./index_files/css2" rel="stylesheet">
+
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --ink:#1a1a2e;
+  --paper:#faf8f3;
+  --cream:#f2ede3;
+  --accent:#c0392b;
+  --gold:#c9860a;
+  --green:#1e8449;
+  --sky:#2471a3;
+  --muted:#7a7068;
+  --border:#ddd6c8;
+  --white:#ffffff;
+  --shadow:0 4px 20px rgba(0,0,0,.12);
+  --r:16px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+html,body{height:100%;overflow:hidden}
+body{
+  background:var(--paper);
+  font-family:'Noto Sans KR',sans-serif;
+  color:var(--ink);
+  display:flex;
+  flex-direction:column;
+}
+
+/* ── Layout ── */
+#app{display:flex;flex-direction:column;height:100%;overflow:hidden}
+
+.header{
+  background:var(--ink);
+  color:white;
+  padding:max(env(safe-area-inset-top,14px),14px) 20px 14px;
+  text-align:center;
+  flex-shrink:0;
+}
+.header-title{
+  font-family:'Playfair Display',serif;
+  font-size:22px;
+  letter-spacing:.3px;
+}
+.header-sub{font-size:11px;color:#9a9aaa;margin-top:2px}
+
+.tab-bar{
+  display:flex;
+  background:var(--ink);
+  border-bottom:3px solid var(--accent);
+  flex-shrink:0;
+}
+.tab-btn{
+  flex:1;border:none;background:none;
+  color:#9a9aaa;padding:11px 4px;
+  font-size:12px;font-family:'Noto Sans KR',sans-serif;
+  cursor:pointer;transition:all .2s;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+}
+.tab-btn .ico{font-size:18px}
+.tab-btn.active{color:white;background:rgba(192,57,43,.2);font-weight:600}
+
+.tab-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.tab-page{display:none;padding:16px}
+.tab-page.active{display:block}
+
+/* ── Buttons ── */
+.btn{
+  border:none;border-radius:12px;cursor:pointer;
+  font-family:'Noto Sans KR',sans-serif;font-weight:600;
+  transition:opacity .2s, transform .1s;
+  active-scale:.97;
+}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--accent);color:white;padding:13px 20px;font-size:14px}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed}
+.btn-gold{background:var(--gold);color:white;padding:8px 14px;font-size:13px;border-radius:10px}
+.btn-outline{background:transparent;border:2px solid var(--ink);color:var(--ink);padding:12px 20px;font-size:14px}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-full{width:100%}
+
+/* ── Search Tab ── */
+.search-row{display:flex;gap:8px;margin-bottom:16px}
+.search-input{
+  flex:1;border:2px solid var(--border);border-radius:14px;
+  padding:13px 16px;font-size:15px;font-family:'Noto Sans KR',sans-serif;
+  background:white;outline:none;transition:border .2s;
+  color:var(--ink);
+}
+.search-input:focus{border-color:var(--accent)}
+.search-input::placeholder{color:#bbb}
+
+.result-card{
+  background:white;border-radius:var(--r);
+  box-shadow:var(--shadow);padding:20px;
+  display:flex;flex-direction:column;gap:14px;
+  animation:fadeUp .3s ease;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.idiom-big{font-family:'Playfair Display',serif;font-size:22px;line-height:1.3;color:var(--ink)}
+.badge-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px}
+.badge{
+  font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;
+  letter-spacing:.5px;
+}
+.badge-en{background:#e8f0fe;color:#1a56db}
+.badge-ko{background:#fce8e6;color:var(--accent)}
+
+.meaning-block{display:flex;flex-direction:column;gap:8px}
+.meaning-row{display:flex;align-items:flex-start;gap:10px}
+.meaning-flag{font-size:16px;line-height:1.4;flex-shrink:0}
+.meaning-text{font-size:14px;line-height:1.5}
+.meaning-text.ko{font-weight:600;color:var(--accent)}
+
+.example-block{
+  background:var(--cream);
+  border-left:3px solid var(--gold);
+  border-radius:10px;padding:12px 14px;
+}
+.block-label{font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.8px;margin-bottom:4px}
+.example-text{font-style:italic;font-size:13px;color:#444;line-height:1.6}
+
+.tip-block{
+  background:#eafaf1;
+  border-left:3px solid var(--green);
+  border-radius:10px;padding:12px 14px;
+}
+.tip-block .block-label{color:var(--green)}
+.tip-text{font-size:13px;color:#1a5c36;line-height:1.5}
+
+.msg-ok{color:var(--green);font-size:13px;font-weight:600;text-align:center}
+.msg-warn{color:var(--gold);font-size:13px;font-weight:600;text-align:center}
+
+/* ── Loader ── */
+.loader-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;padding:50px 20px;color:var(--muted)}
+.spinner{
+  width:40px;height:40px;border-radius:50%;
+  border:3px solid var(--border);border-top-color:var(--accent);
+  animation:spin 1s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.empty-state{
+  text-align:center;padding:60px 20px;color:var(--muted);
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+}
+.empty-ico{font-size:48px}
+.empty-text{font-size:15px;line-height:1.8}
+
+/* ── 숙어장 Tab ── */
+.vocab-meta{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:12px;
+}
+.vocab-count{font-size:12px;color:var(--muted)}
+.vocab-list{display:flex;flex-direction:column;gap:10px}
+.vocab-item{
+  background:white;border-radius:var(--r);
+  box-shadow:0 2px 10px rgba(0,0,0,.07);
+  overflow:hidden;
+}
+.vocab-header{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 16px;cursor:pointer;
+  -webkit-user-select:none;user-select:none;
+}
+.vocab-num{
+  width:24px;height:24px;border-radius:50%;
+  background:var(--cream);color:var(--muted);
+  font-size:11px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.vocab-main{flex:1;min-width:0}
+.vocab-idiom{font-family:'Playfair Display',serif;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vocab-preview{font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vocab-chevron{color:var(--muted);font-size:12px;flex-shrink:0;transition:transform .2s}
+.vocab-item.open .vocab-chevron{transform:rotate(180deg)}
+.vocab-del{
+  background:none;border:none;cursor:pointer;
+  color:#ccc;font-size:16px;padding:4px 8px;border-radius:8px;
+  transition:all .2s;flex-shrink:0;
+}
+.vocab-del:active{color:var(--accent);background:#feeced}
+
+.vocab-body{
+  display:none;padding:0 16px 14px;
+  border-top:1px solid var(--border);padding-top:12px;
+  flex-direction:column;gap:10px;
+}
+.vocab-item.open .vocab-body{display:flex}
+
+/* ── Game Tab ── */
+.game-idle{
+  display:flex;flex-direction:column;align-items:center;
+  gap:16px;padding:40px 16px;text-align:center;
+}
+.game-hero-ico{font-size:70px;animation:bounce 2s infinite}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.game-hero-title{font-family:'Playfair Display',serif;font-size:28px}
+.game-hint{color:var(--muted);font-size:13px;line-height:1.8}
+.game-modes{display:flex;flex-direction:column;gap:10px;width:100%}
+.game-mode-btn{
+  display:flex;align-items:center;gap:14px;
+  background:white;border:2px solid var(--border);
+  border-radius:var(--r);padding:16px 18px;
+  cursor:pointer;text-align:left;transition:border .2s;
+  font-family:'Noto Sans KR',sans-serif;
+}
+.game-mode-btn:active{border-color:var(--accent)}
+.mode-ico{font-size:28px}
+.mode-info{}
+.mode-name{font-size:14px;font-weight:700;color:var(--ink)}
+.mode-desc{font-size:12px;color:var(--muted);margin-top:2px}
+
+/* Playing */
+.q-progress-wrap{margin-bottom:12px}
+.q-progress-bg{background:var(--border);border-radius:4px;height:5px;overflow:hidden}
+.q-progress-fill{height:100%;background:var(--accent);border-radius:4px;transition:width .4s ease}
+.q-meta{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted);margin-top:6px}
+.q-score-live{font-weight:700;color:var(--ink)}
+
+.q-card{
+  background:var(--ink);color:white;
+  border-radius:var(--r);padding:30px 22px;
+  text-align:center;margin-bottom:20px;
+  box-shadow:var(--shadow);
+}
+.q-idiom-text{font-family:'Playfair Display',serif;font-size:26px;margin-bottom:8px;line-height:1.3}
+.q-ask{font-size:12px;color:#9a9aaa}
+
+.choices{display:flex;flex-direction:column;gap:10px}
+.choice-btn{
+  display:flex;align-items:center;gap:12px;
+  background:white;border:2px solid var(--border);
+  border-radius:14px;padding:13px 16px;
+  font-size:14px;font-family:'Noto Sans KR',sans-serif;
+  cursor:pointer;text-align:left;
+  transition:border .2s, background .2s;
+  width:100%;
+}
+.choice-btn:disabled{cursor:default}
+.choice-btn.correct{border-color:var(--green);background:#eafaf1}
+.choice-btn.wrong{border-color:var(--accent);background:#feeced}
+.choice-letter{
+  width:28px;height:28px;border-radius:8px;
+  background:var(--cream);color:var(--muted);
+  font-size:12px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.choice-btn.correct .choice-letter{background:var(--green);color:white}
+.choice-btn.wrong .choice-letter{background:var(--accent);color:white}
+.next-wrap{margin-top:14px}
+
+/* Done */
+.done-screen{display:flex;flex-direction:column;align-items:center;gap:16px;padding:20px 0}
+.score-ring{
+  width:120px;height:120px;border-radius:50%;
+  background:var(--ink);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  box-shadow:0 8px 32px rgba(0,0,0,.2);
+  margin:10px 0;
+}
+.score-big{font-family:'Playfair Display',serif;font-size:44px;color:white;line-height:1}
+.score-of{font-size:13px;color:#9a9aaa}
+.score-grade{font-size:20px;font-weight:700}
+.review-list{width:100%;display:flex;flex-direction:column;gap:8px}
+.review-row{
+  display:flex;align-items:center;gap:10px;
+  background:white;border-radius:12px;padding:11px 14px;
+  font-size:13px;
+}
+.review-row.ok{border-left:3px solid var(--green)}
+.review-row.fail{border-left:3px solid var(--accent)}
+.review-idiom{flex:1;font-family:'Playfair Display',serif}
+.review-ans{font-size:11px;color:var(--green)}
+
+/* Misc */
+.divider{height:1px;background:var(--border);margin:4px 0}
+.bottom-pad{height:calc(20px + var(--safe-bottom))}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="header">
+    <div style="position:relative;display:flex;align-items:center;justify-content:center">
+      <div>
+        <div class="header-title">📖 Idiom Master</div>
+        <div class="header-sub">영어 숙어 검색 · 숙어장 · 퀴즈</div>
+      </div>
+      <button onclick="showApiKeyModal(()=&gt;{})" title="API 키 설정" style="position:absolute;right:0;background:rgba(255,255,255,.1);border:none;color:#ccc;
+               font-size:18px;cursor:pointer;padding:6px 8px;border-radius:8px;line-height:1">⚙️</button>
+    </div>
+  </header>
+
+  <nav class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab(0)" id="tab0">
+      <span class="ico">🔍</span>검색
+    </button>
+    <button class="tab-btn" onclick="switchTab(1)" id="tab1">
+      <span class="ico">📚</span>숙어장
+    </button>
+    <button class="tab-btn" onclick="switchTab(2)" id="tab2">
+      <span class="ico">🎮</span>게임
+    </button>
+  </nav>
+
+  <div class="tab-scroll">
+    <!-- ── 검색 ── -->
+    <div class="tab-page active" id="page0">
+      <div class="search-row">
+        <input class="search-input" id="searchInput" type="text" placeholder="영어 숙어 입력 (예: break a leg)" autocomplete="off" autocorrect="off" spellcheck="false" onkeydown="if(event.key===&#39;Enter&#39;)doSearch()">
+        <button class="btn btn-primary" onclick="doSearch()" id="searchBtn">검색</button>
+      </div>
+      <div id="searchResult"></div>
+    </div>
+
+    <!-- ── 숙어장 ── -->
+    <div class="tab-page" id="page1">
+      <div class="vocab-meta">
+        <span class="vocab-count" id="vocabCount">0개 저장됨</span>
+      </div>
+      <div class="vocab-list" id="vocabList"><div class="empty-state">
+      <div class="empty-ico">📭</div>
+      <div class="empty-text">아직 저장된 숙어가 없어요.<br>검색 탭에서 추가해보세요!</div>
+    </div></div>
+      <div class="bottom-pad"></div>
+    </div>
+
+    <!-- ── 게임 ── -->
+    <div class="tab-page" id="page2">
+      <div id="gameArea">
+    <div class="game-idle">
+      <div class="game-hero-ico">🎮</div>
+      <div class="game-hero-title">숙어 퀴즈</div>
+      <div class="game-hint">숙어장에 4개 이상 저장하면<br>게임을 시작할 수 있어요!</div>
+    </div></div>
+      <div class="bottom-pad"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Storage ────────────────────────────────────────────────────────────────
+const STORAGE_KEY = 'idiom-master-v2';
+let vocab = [];
+try { vocab = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch(e){}
+
+function saveVocab(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(vocab)); }
+
+function addVocab(entry){
+  if(vocab.find(x=>x.idiom.toLowerCase()===entry.idiom.toLowerCase())) return false;
+  vocab.unshift(entry); saveVocab(); renderVocab(); return true;
+}
+
+function removeVocab(idiom){
+  vocab = vocab.filter(x=>x.idiom!==idiom); saveVocab(); renderVocab();
+}
+
+// ── Tabs ───────────────────────────────────────────────────────────────────
+function switchTab(n){
+  document.querySelectorAll('.tab-page').forEach((p,i)=>p.classList.toggle('active',i===n));
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i===n));
+  if(n===1) renderVocab();
+  if(n===2) renderGameIdle();
+}
+
+// ── API Key Management ─────────────────────────────────────────────────────
+const API_KEY_STORAGE = 'idiom-master-apikey';
+let apiKey = localStorage.getItem(API_KEY_STORAGE) || '';
+
+function getApiKey(){ return apiKey; }
+
+function saveApiKey(key){
+  apiKey = key.trim();
+  localStorage.setItem(API_KEY_STORAGE, apiKey);
+}
+
+function clearApiKey(){
+  apiKey = '';
+  localStorage.removeItem(API_KEY_STORAGE);
+}
+
+function showApiKeyModal(onSuccess){
+  const overlay = document.createElement('div');
+  overlay.id = 'apiModal';
+  overlay.style.cssText = `
+    position:fixed;inset:0;background:rgba(0,0,0,.7);
+    display:flex;align-items:center;justify-content:center;
+    z-index:9999;padding:24px;backdrop-filter:blur(4px);
+  `;
+  overlay.innerHTML = `
+    <div style="background:white;border-radius:20px;padding:28px 24px;max-width:380px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+      <div style="font-size:36px;text-align:center;margin-bottom:8px">🔑</div>
+      <h2 style="font-family:'Playfair Display',serif;font-size:20px;text-align:center;color:#1a1a2e;margin-bottom:8px">API 키 설정</h2>
+      <p style="font-size:12px;color:#7a7068;text-align:center;line-height:1.6;margin-bottom:16px">
+        Anthropic API 키를 입력하세요.<br>키는 이 기기에만 저장되며 외부로 전송되지 않습니다.
+      </p>
+      <div style="background:#faf8f3;border-radius:12px;padding:12px;margin-bottom:14px;font-size:11px;color:#7a7068;line-height:1.7">
+        📌 API 키 발급: <a href="https://console.anthropic.com/api-keys" target="_blank" style="color:#c0392b">console.anthropic.com</a><br>
+        에서 무료 가입 후 발급받을 수 있습니다.
+      </div>
+      <input id="apiKeyInput" type="password"
+        placeholder="sk-ant-api03-..."
+        style="width:100%;border:2px solid #ddd6c8;border-radius:12px;padding:13px 16px;font-size:13px;font-family:monospace;outline:none;margin-bottom:10px;box-sizing:border-box"
+        value="${apiKey}"
+      />
+      <div id="apiKeyErr" style="color:#c0392b;font-size:12px;margin-bottom:10px;display:none;text-align:center"></div>
+      <button onclick="handleApiKeySave()" style="width:100%;background:#c0392b;color:white;border:none;border-radius:12px;padding:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Noto Sans KR',sans-serif">
+        저장하고 시작하기
+      </button>
+    </div>`;
+  document.body.appendChild(overlay);
+  document.getElementById('apiKeyInput').focus();
+  window._apiKeyCallback = onSuccess;
+}
+
+async function handleApiKeySave(){
+  const val = document.getElementById('apiKeyInput').value.trim();
+  const errEl = document.getElementById('apiKeyErr');
+  if(!val.startsWith('sk-ant-')){
+    errEl.textContent = '올바른 API 키 형식이 아닙니다 (sk-ant-로 시작)';
+    errEl.style.display='block'; return;
+  }
+  errEl.style.display='none';
+  saveApiKey(val);
+  document.getElementById('apiModal').remove();
+  if(window._apiKeyCallback) window._apiKeyCallback();
+}
+
+// ── Claude API ─────────────────────────────────────────────────────────────
+async function callClaude(userMsg, sys){
+  if(!getApiKey()){
+    return new Promise(resolve => showApiKeyModal(async()=>{
+      resolve(await callClaude(userMsg, sys));
+    }));
+  }
+  const controller = new AbortController();
+  const timeout = setTimeout(()=>controller.abort(), 30000);
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key': getApiKey(),
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      signal: controller.signal,
+      body:JSON.stringify({
+        model:'claude-sonnet-4-6',
+        max_tokens:1000,
+        system: sys || 'Return ONLY valid JSON, no markdown fences.',
+        messages:[{role:'user',content:userMsg}]
+      })
+    });
+    if(res.status===401){
+      clearApiKey();
+      throw new Error('API 키가 만료되었거나 유효하지 않습니다. 다시 설정해주세요.');
+    }
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const data = await res.json();
+    const raw = (data.content?.[0]?.text || '{}').replace(/```json|```/g,'').trim();
+    return JSON.parse(raw);
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+// ── Search ─────────────────────────────────────────────────────────────────
+let lastResult = null;
+let searchMsg = '';
+
+async function doSearch(){
+  const q = document.getElementById('searchInput').value.trim();
+  if(!q) return;
+  const btn = document.getElementById('searchBtn');
+  btn.disabled = true;
+  document.getElementById('searchResult').innerHTML = `
+    <div class="loader-wrap">
+      <div class="spinner"></div>
+      <p>Claude가 분석 중…</p>
+    </div>`;
+
+  try {
+    const sys = `You are an English idiom expert. Return ONLY valid JSON with keys:
+idiom, meaning_en, meaning_ko, example, tip.
+No markdown fences, no extra text.`;
+    const data = await callClaude(`Look up this English idiom: "${q}"`, sys);
+    lastResult = data;
+    renderSearchResult(data, '');
+  } catch(e){
+    const isOffline = !navigator.onLine;
+    document.getElementById('searchResult').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-ico">${isOffline?'📡':'❌'}</div>
+        <div class="empty-text">${isOffline
+          ? '인터넷 연결을 확인해주세요.'
+          : '검색에 실패했습니다.<br>⚙️ 버튼을 눌러 API 키를 다시 확인해주세요.'}</div>
+        <div style="font-size:11px;color:#aaa;margin-top:8px;word-break:break-all">${e.message||''}</div>
+      </div>`;
+  }
+  btn.disabled = false;
+}
+
+function renderSearchResult(d, msg){
+  document.getElementById('searchResult').innerHTML = `
+    <div class="result-card">
+      <div class="card-top">
+        <div>
+          <div class="idiom-big">${d.idiom}</div>
+          <div class="badge-row">
+            <span class="badge badge-en">EN</span>
+            <span class="badge badge-ko">KO</span>
+          </div>
+        </div>
+        <button class="btn btn-gold btn-sm" onclick="handleAdd()">+ 숙어장</button>
+      </div>
+      <div class="divider"></div>
+      <div class="meaning-block">
+        <div class="meaning-row">
+          <span class="meaning-flag">🇺🇸</span>
+          <span class="meaning-text">${d.meaning_en}</span>
+        </div>
+        <div class="meaning-row">
+          <span class="meaning-flag">🇰🇷</span>
+          <span class="meaning-text ko">${d.meaning_ko}</span>
+        </div>
+      </div>
+      <div class="example-block">
+        <div class="block-label">💬 예문</div>
+        <div class="example-text">"${d.example}"</div>
+      </div>
+      ${d.tip ? `<div class="tip-block">
+        <div class="block-label">💡 TIP</div>
+        <div class="tip-text">${d.tip}</div>
+      </div>` : ''}
+      ${msg ? `<div class="${msg.startsWith('✅')?'msg-ok':'msg-warn'}">${msg}</div>` : ''}
+    </div>`;
+}
+
+function handleAdd(){
+  if(!lastResult) return;
+  const ok = addVocab(lastResult);
+  renderSearchResult(lastResult, ok ? '✅ 숙어장에 추가되었습니다!' : '⚠️ 이미 숙어장에 있습니다.');
+}
+
+// ── Vocab ──────────────────────────────────────────────────────────────────
+function renderVocab(){
+  document.getElementById('vocabCount').textContent = vocab.length + '개 저장됨';
+  const el = document.getElementById('vocabList');
+  if(vocab.length===0){
+    el.innerHTML = `<div class="empty-state">
+      <div class="empty-ico">📭</div>
+      <div class="empty-text">아직 저장된 숙어가 없어요.<br>검색 탭에서 추가해보세요!</div>
+    </div>`; return;
+  }
+  el.innerHTML = vocab.map((item,i)=>`
+    <div class="vocab-item" id="vi-${i}">
+      <div class="vocab-header" onclick="toggleVocab(${i})">
+        <div class="vocab-num">${i+1}</div>
+        <div class="vocab-main">
+          <div class="vocab-idiom">${item.idiom}</div>
+          <div class="vocab-preview">${item.meaning_ko}</div>
+        </div>
+        <span class="vocab-chevron">▼</span>
+        <button class="vocab-del" onclick="event.stopPropagation();confirmDel('${item.idiom.replace(/'/g,"\\'")}')">✕</button>
+      </div>
+      <div class="vocab-body">
+        <div class="meaning-row">
+          <span class="meaning-flag">🇺🇸</span>
+          <span class="meaning-text">${item.meaning_en}</span>
+        </div>
+        <div class="meaning-row">
+          <span class="meaning-flag">🇰🇷</span>
+          <span class="meaning-text ko">${item.meaning_ko}</span>
+        </div>
+        <div class="example-block">
+          <div class="block-label">💬 예문</div>
+          <div class="example-text">"${item.example}"</div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function toggleVocab(i){
+  const el = document.getElementById('vi-'+i);
+  el.classList.toggle('open');
+}
+
+function confirmDel(idiom){
+  if(confirm(`"${idiom}"\n숙어장에서 삭제할까요?`)) removeVocab(idiom);
+}
+
+// ── Game ───────────────────────────────────────────────────────────────────
+let gameQ = [], gameIdx = 0, gameScore = 0, gameResults = [], gameSelected = null;
+
+function renderGameIdle(){
+  const enough = vocab.length >= 4;
+  document.getElementById('gameArea').innerHTML = `
+    <div class="game-idle">
+      <div class="game-hero-ico">🎮</div>
+      <div class="game-hero-title">숙어 퀴즈</div>
+      ${!enough
+        ? `<div class="game-hint">숙어장에 4개 이상 저장하면<br>게임을 시작할 수 있어요!</div>`
+        : `<div class="game-hint">숙어장을 기반으로 4지선다 퀴즈!</div>
+           <div class="game-modes">
+             <button class="game-mode-btn" onclick="startVocabGame()">
+               <span class="mode-ico">📚</span>
+               <div class="mode-info">
+                 <div class="mode-name">내 숙어장 퀴즈</div>
+                 <div class="mode-desc">저장된 숙어로 빠르게 시작</div>
+               </div>
+             </button>
+             <button class="game-mode-btn" onclick="startAIGame()">
+               <span class="mode-ico">🤖</span>
+               <div class="mode-info">
+                 <div class="mode-name">AI 변형 퀴즈</div>
+                 <div class="mode-desc">Claude가 오답 보기까지 생성</div>
+               </div>
+             </button>
+           </div>`
+      }
+    </div>`;
+}
+
+function startVocabGame(){
+  const pool = [...vocab].sort(()=>Math.random()-.5).slice(0,5);
+  gameQ = pool.map(item=>{
+    const dist = vocab
+      .filter(x=>x.idiom!==item.idiom)
+      .sort(()=>Math.random()-.5).slice(0,3)
+      .map(x=>x.meaning_ko);
+    const choices = [item.meaning_ko,...dist].sort(()=>Math.random()-.5);
+    return {idiom:item.idiom, meaning_ko:item.meaning_ko, choices, answer:item.meaning_ko};
+  });
+  startGame();
+}
+
+async function startAIGame(){
+  document.getElementById('gameArea').innerHTML = `
+    <div class="loader-wrap">
+      <div class="spinner"></div>
+      <p>AI가 퀴즈를 생성 중…</p>
+    </div>`;
+  try {
+    const sample = [...vocab].sort(()=>Math.random()-.5).slice(0,5).map(x=>x.idiom).join(', ');
+    const sys = `You are an English idiom quiz generator. Return ONLY a valid JSON array of 5 objects.
+Each object: {"idiom":"...","meaning_ko":"...","choices":["A_Korean","B_Korean","C_Korean","D_Korean"],"answer":"exact_correct_choice"}
+choices must be Korean meanings; one correct, three plausible distractors. No markdown.`;
+    const qs = await callClaude(`Generate quiz for: ${sample}`, sys);
+    gameQ = Array.isArray(qs) ? qs : [];
+    startGame();
+  } catch(e){
+    renderGameIdle();
+  }
+}
+
+function startGame(){
+  gameIdx=0; gameScore=0; gameResults=[]; gameSelected=null;
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const q = gameQ[gameIdx];
+  const letters = ['A','B','C','D'];
+  document.getElementById('gameArea').innerHTML = `
+    <div class="q-progress-wrap">
+      <div class="q-progress-bg">
+        <div class="q-progress-fill" style="width:${((gameIdx)/gameQ.length)*100}%"></div>
+      </div>
+      <div class="q-meta">
+        <span>${gameIdx+1} / ${gameQ.length}</span>
+        <span class="q-score-live">점수: ${gameScore}</span>
+      </div>
+    </div>
+    <div class="q-card">
+      <div class="q-idiom-text">${q.idiom}</div>
+      <div class="q-ask">이 숙어의 한국어 뜻은?</div>
+    </div>
+    <div class="choices">
+      ${q.choices.map((c,i)=>`
+        <button class="choice-btn" id="ch-${i}" onclick="chooseAnswer(${i})">
+          <span class="choice-letter">${letters[i]}</span>${c}
+        </button>`).join('')}
+    </div>
+    <div class="next-wrap" id="nextWrap" style="display:none">
+      <button class="btn btn-primary btn-full" onclick="nextQuestion()">
+        ${gameIdx+1>=gameQ.length ? '결과 보기 →' : '다음 문제 →'}
+      </button>
+    </div>`;
+}
+
+function chooseAnswer(i){
+  if(gameSelected!==null) return;
+  gameSelected = i;
+  const q = gameQ[gameIdx];
+  const correct = q.choices[i]===q.answer;
+  if(correct) gameScore++;
+  gameResults.push({idiom:q.idiom, correct, chosen:q.choices[i], answer:q.answer});
+
+  q.choices.forEach((_,idx)=>{
+    const btn = document.getElementById('ch-'+idx);
+    btn.disabled = true;
+    if(q.choices[idx]===q.answer) btn.classList.add('correct');
+    else if(idx===i) btn.classList.add('wrong');
+  });
+  document.getElementById('nextWrap').style.display='block';
+}
+
+function nextQuestion(){
+  gameSelected=null;
+  gameIdx++;
+  if(gameIdx>=gameQ.length){ renderDone(); return; }
+  renderQuestion();
+}
+
+function renderDone(){
+  const pct = Math.round((gameScore/gameQ.length)*100);
+  const grade = pct>=80?'🏆 훌륭해요!':pct>=60?'👍 잘했어요!':'📖 더 연습해봐요!';
+  document.getElementById('gameArea').innerHTML = `
+    <div class="done-screen">
+      <div class="score-ring">
+        <div class="score-big">${gameScore}</div>
+        <div class="score-of">/ ${gameQ.length}</div>
+      </div>
+      <div class="score-grade">${grade}</div>
+      <div class="review-list">
+        ${gameResults.map(r=>`
+          <div class="review-row ${r.correct?'ok':'fail'}">
+            <span>${r.correct?'✅':'❌'}</span>
+            <span class="review-idiom">${r.idiom}</span>
+            ${!r.correct?`<span class="review-ans">→ ${r.answer}</span>`:''}
+          </div>`).join('')}
+      </div>
+      <button class="btn btn-primary btn-full" onclick="renderGameIdle()">다시 하기</button>
+    </div>`;
+}
+
+// ── Service Worker 없음 (PWA standalone에서 API 차단 방지) ──────────────────
+// 혹시 이전에 등록된 SW가 있으면 즉시 제거
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.getRegistrations().then(regs=>{
+    regs.forEach(r=>r.unregister());
+  });
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+renderVocab();
+renderGameIdle();
+// API 키 없으면 첫 실행 시 자동으로 설정 모달 표시
+if(!getApiKey()){
+  setTimeout(()=>showApiKeyModal(()=>{}), 400);
+}
+</script>
+
+
+</body></html>
