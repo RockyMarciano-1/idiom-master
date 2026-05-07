@@ -236,7 +236,7 @@ async function loadFromGitHub(){
     if(!res.ok) throw new Error('GitHub 오류 ' + res.status);
     const data = await res.json();
     ghFileSha = data.sha;
-    const decoded = JSON.parse(atob(data.content.replace(/\n/g,'')));
+    const decoded = JSON.parse(decodeURIComponent(escape(atob(data.content.replace(/\n/g,'')))));
     vocab = Array.isArray(decoded) ? decoded : [];
     localStorage.setItem(LS_VOCAB, JSON.stringify(vocab));
     renderVocab();
@@ -257,7 +257,7 @@ async function loadFromGitHubManual(){
     if(!res.ok) throw new Error("GitHub 오류 " + res.status);
     const data = await res.json();
     ghFileSha = data.sha;
-    const decoded = JSON.parse(atob(data.content.replace(/\n/g,"")));
+    const decoded = JSON.parse(decodeURIComponent(escape(atob(data.content.replace(/\n/g,"")))));
     vocab = Array.isArray(decoded) ? decoded : [];
     localStorage.setItem(LS_VOCAB, JSON.stringify(vocab));
     renderVocab();
