@@ -172,7 +172,10 @@ body{background:var(--paper);font-family:'Noto Sans KR',sans-serif;color:var(--i
     <div class="tab-page" id="page1">
       <div class="vocab-meta">
         <span class="vocab-count" id="vocabCount">0개 저장됨</span>
-        <button class="btn btn-outline btn-sm" onclick="syncToGitHub(true)">☁️ 동기화</button>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-outline btn-sm" onclick="loadFromGitHubManual()">📥 불러오기</button>
+          <button class="btn btn-outline btn-sm" onclick="syncToGitHub(true)">☁️ 동기화</button>
+        </div>
       </div>
       <div class="vocab-list" id="vocabList"></div>
       <div class="bottom-pad"></div>
@@ -241,6 +244,28 @@ async function loadFromGitHub(){
   } catch(e){
     loadFromLocal();
     setSyncStatus('err', '⚠️ GitHub 연결 실패 · 로컬 캐시 사용 중');
+  }
+}
+
+async function loadFromGitHubManual(){
+  if(!ghToken){ alert("⚙️ 설정에서 GitHub 토큰을 먼저 입력해주세요."); return; }
+  if(!confirm("GitHub에서 숙어장을 불러올까요?\n현재 기기의 숙어장은 GitHub 데이터로 교체됩니다.")) return;
+  setSyncStatus("ing", "☁️ GitHub에서 불러오는 중...");
+  try {
+    const res = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_FILE}?ref=${GH_BRANCH}`, { headers: ghHeaders() });
+    if(res.status===404){ alert("GitHub에 저장된 숙어장이 없습니다."); setSyncStatus("err","⚠️ GitHub에 저장된 데이터 없음"); return; }
+    if(!res.ok) throw new Error("GitHub 오류 " + res.status);
+    const data = await res.json();
+    ghFileSha = data.sha;
+    const decoded = JSON.parse(atob(data.content.replace(/\n/g,"")));
+    vocab = Array.isArray(decoded) ? decoded : [];
+    localStorage.setItem(LS_VOCAB, JSON.stringify(vocab));
+    renderVocab();
+    setSyncStatus("ok", "✅ GitHub에서 불러옴 · " + vocab.length + "개");
+    alert("✅ " + vocab.length + "개 숙어를 GitHub에서 불러왔습니다!");
+  } catch(e){
+    setSyncStatus("err","⚠️ 불러오기 실패");
+    alert("❌ 불러오기 실패: " + e.message);
   }
 }
 
@@ -417,6 +442,7 @@ async function doSearch(){
       </div>`;
   }
   btn.disabled = false;
+  document.getElementById("searchInput").value = "";
 }
 
 function renderSearchResult(d, msg){
