@@ -55,6 +55,9 @@ body{background:var(--paper);font-family:'Noto Sans KR',sans-serif;color:var(--i
 .btn-outline{background:transparent;border:2px solid var(--ink);color:var(--ink);padding:12px 20px;font-size:14px}
 .btn-sm{padding:6px 12px;font-size:12px}
 .btn-full{width:100%}
+.mode-toggle{display:flex;gap:6px;margin-bottom:12px}
+.toggle-btn{flex:1;border:2px solid var(--border);border-radius:12px;padding:10px 8px;font-size:12px;font-family:"Noto Sans KR",sans-serif;font-weight:600;background:white;color:var(--muted);cursor:pointer;transition:all .2s}
+.toggle-btn.active{background:var(--ink);color:white;border-color:var(--ink)}
 .search-row{display:flex;gap:8px;margin-bottom:16px}
 .search-input{flex:1;border:2px solid var(--border);border-radius:14px;padding:13px 16px;font-size:15px;font-family:'Noto Sans KR',sans-serif;background:white;outline:none;transition:border .2s;color:var(--ink)}
 .search-input:focus{border-color:var(--accent)}
@@ -163,6 +166,10 @@ body{background:var(--paper);font-family:'Noto Sans KR',sans-serif;color:var(--i
   </nav>
   <div class="tab-scroll">
     <div class="tab-page active" id="page0">
+      <div class="mode-toggle">
+        <button class="toggle-btn active" id="toggleEN" onclick="setSearchMode('en')">🇺🇸 영어 → 한국어</button>
+        <button class="toggle-btn" id="toggleKO" onclick="setSearchMode('ko')">🇰🇷 한국어 → 영어</button>
+      </div>
       <div class="search-row">
         <input class="search-input" id="searchInput" type="text" placeholder="영어 숙어 입력 (예: break a leg)" autocomplete="off" autocorrect="off" spellcheck="false" onkeydown="if(event.key==='Enter')doSearch()"/>
         <button class="btn btn-primary" onclick="doSearch()" id="searchBtn">검색</button>
@@ -390,37 +397,45 @@ async function callClaude(userMsg, sys){
     showSettingsModal();
     throw new Error('API 키를 먼저 설정해주세요.');
   }
-  const controller = new AbortController();
-  const timeout = setTimeout(()=>controller.abort(), 30000);
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access':'true'
-      },
-      signal: controller.signal,
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1000,
-        system: sys || 'Return ONLY valid JSON, no markdown fences.',
-        messages: [{role:'user', content:userMsg}]
-      })
-    });
-    if(res.status===401){ apiKey=''; localStorage.removeItem(LS_API); throw new Error('API 키가 유효하지 않습니다.'); }
-    if(!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    const raw = (data.content?.[0]?.text||'{}').replace(/```json|```/g,'').trim();
-    return JSON.parse(raw);
-  } finally {
-    clearTimeout(timeout);
-  }
+  const res = await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access':'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 1000,
+      system: sys || 'Return ONLY valid JSON, no markdown fences.',
+      messages: [{role:'user', content:userMsg}]
+    })
+  });
+  if(res.status===401){ apiKey=''; localStorage.removeItem(LS_API); throw new Error('API 키가 유효하지 않습니다.'); }
+  if(!res.ok) throw new Error('HTTP ' + res.status);
+  const data = await res.json();
+  const raw = (data.content?.[0]?.text||'{}').replace(/```json|```/g,'').trim();
+  return JSON.parse(raw);
 }
 
 // ── Search ─────────────────────────────────────────────────────────────────
 let lastResult = null;
+let searchMode = "en"; // "en" = 영어숙어→한국어, "ko" = 한국어→영어숙어
+
+function setSearchMode(mode){
+  searchMode = mode;
+  document.getElementById("toggleEN").classList.toggle("active", mode==="en");
+  document.getElementById("toggleKO").classList.toggle("active", mode==="ko");
+  const input = document.getElementById("searchInput");
+  if(mode==="en"){
+    input.placeholder = "영어 숙어 입력 (예: break a leg)";
+  } else {
+    input.placeholder = "한국어 표현 입력 (예: 발이 넓다, 눈이 높다)";
+  }
+  input.value="";
+  document.getElementById("searchResult").innerHTML="";
+}
 
 async function doSearch(){
   const q = document.getElementById('searchInput').value.trim();
@@ -429,8 +444,14 @@ async function doSearch(){
   btn.disabled = true;
   document.getElementById('searchResult').innerHTML = `<div class="loader-wrap"><div class="spinner"></div><p>Claude가 분석 중…</p></div>`;
   try {
-    const sys = `You are an English idiom expert. Return ONLY valid JSON with keys: idiom, meaning_en, meaning_ko, example, tip. No markdown fences, no extra text.`;
-    const data = await callClaude(`Look up this English idiom: "${q}"`, sys);
+    let data;
+    if(searchMode === 'ko'){
+      const sys = `You are an English idiom expert. The user gives a Korean expression or concept. Find the most natural English idiom or phrase that matches it. Return ONLY valid JSON with keys: idiom (the English idiom/phrase), meaning_en (English explanation), meaning_ko (Korean meaning matching the input), example (example sentence), tip (usage tip or cultural note). No markdown fences, no extra text.`;
+      data = await callClaude(`Find the English idiom that best matches this Korean expression: "${q}"`, sys);
+    } else {
+      const sys = `You are an English idiom expert. Return ONLY valid JSON with keys: idiom, meaning_en, meaning_ko, example, tip. No markdown fences, no extra text.`;
+      data = await callClaude(`Look up this English idiom: "${q}"`, sys);
+    }
     lastResult = data;
     renderSearchResult(data, '');
   } catch(e){
